@@ -13,9 +13,10 @@ import (
 	"time"
 )
 
-var teether_path = "/home/f_dokic/teether/"
+var teether_path = "/home/fdokic/dev/teether/"
 var contract_table_path = []string{"conv0.csv"}
 var result_file_dir = "results/"
+var contract_offset = 22
 
 func main() {
 	fmt.Println("process start")
@@ -26,13 +27,13 @@ func main() {
 	}
 }
 
-func checkContract(p string, i int, c chan int, str []string, wg *sync.WaitGroup) {
+func checkContract(i int, c chan int, str []string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	code := str[1]
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
-	if err := exec.CommandContext(ctx, "python3", teether_path+"bin/gen_exploit.py", code, "0x1234", "0x1000", "+1000", teether_path+result_file_dir+p+fmt.Sprint(i)+".txt", str[0]).Run(); err != nil {
-		fmt.Println("timeout: " + p + fmt.Sprint(i) + err.Error())
+	if err := exec.CommandContext(ctx, "python3", teether_path+"bin/gen_exploit.py", code, "0x1234", "0x1000", "+1000", teether_path+result_file_dir+fmt.Sprint(i)+".txt", str[0]).Run(); err != nil {
+		fmt.Println("timeout: " + fmt.Sprint(i) + err.Error())
 		<-c
 		return
 	}
@@ -51,7 +52,7 @@ func checkContract(p string, i int, c chan int, str []string, wg *sync.WaitGroup
 				panic(err)
 			}
 		}*/
-	fmt.Printf("checked %v %v \n", p, i)
+	fmt.Printf("checked %v \n", i)
 	<-c
 }
 
@@ -67,8 +68,11 @@ func analyzeContracts(contract_table_path string) {
 
 	c := make(chan int, runtime.NumCPU())
 	var wg sync.WaitGroup
+	for i := 0; i < contract_offset; i++ {
+		csvReader.Read()
+	}
 
-	for i := 0; ; i++ {
+	for i := contract_offset; ; i++ {
 		rec, err := csvReader.Read()
 		if err == io.EOF {
 			break
@@ -79,7 +83,7 @@ func analyzeContracts(contract_table_path string) {
 		// do something with read line
 		c <- i
 		wg.Add(1)
-		go checkContract(contract_table_path+"_", i, c, rec, &wg)
+		go checkContract(i, c, rec, &wg)
 
 	}
 
