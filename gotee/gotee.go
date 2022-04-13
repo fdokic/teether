@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var teether_path = "/home/fdokic/dev/teether/"
+var teether_path = "/home/f_dokic/teether/"
 var contract_table_path = []string{"conv0.csv"}
 var result_file_dir = "results/"
 
@@ -31,8 +31,8 @@ func checkContract(p string, i int, c chan int, str []string, wg *sync.WaitGroup
 	code := str[1]
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
-	if err := exec.CommandContext(ctx, "python", teether_path+"bin/gen_exploit.py", code, "0x1234", "0x1000", "+1000", teether_path+result_file_dir+p+fmt.Sprint(i)+".txt", str[0]).Run(); err != nil {
-		fmt.Println("timeout: " + p + fmt.Sprint(i))
+	if err := exec.CommandContext(ctx, "python3", teether_path+"bin/gen_exploit.py", code, "0x1234", "0x1000", "+1000", teether_path+result_file_dir+p+fmt.Sprint(i)+".txt", str[0]).Run(); err != nil {
+		fmt.Println("timeout: " + p + fmt.Sprint(i) + err.Error())
 		<-c
 		return
 	}
@@ -65,7 +65,7 @@ func analyzeContracts(contract_table_path string) {
 
 	csvReader := csv.NewReader(f)
 
-	c := make(chan int, runtime.NumCPU()-2)
+	c := make(chan int, runtime.NumCPU())
 	var wg sync.WaitGroup
 
 	for i := 0; ; i++ {
