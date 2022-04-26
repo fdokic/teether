@@ -13,10 +13,10 @@ import (
 	"time"
 )
 
-var teether_path = "/home/fdokic/dev/teether/"
-var contract_table_path = []string{"conv0.csv"}
+var teether_path = "/home/fdokic/teether/"
+var contract_table_path = []string{"contracts.csv"}
 var result_file_dir = "results/"
-var contract_offset = 22
+var contract_offset = 0
 
 func main() {
 	fmt.Println("process start")
@@ -29,7 +29,7 @@ func main() {
 
 func checkContract(i int, c chan int, str []string, wg *sync.WaitGroup) {
 	defer wg.Done()
-	code := str[1]
+	code := str[2]
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
 	if err := exec.CommandContext(ctx, "python3", teether_path+"bin/gen_exploit.py", code, "0x1234", "0x1000", "+1000", teether_path+result_file_dir+fmt.Sprint(i)+".txt", str[0]).Run(); err != nil {
