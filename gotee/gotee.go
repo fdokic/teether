@@ -32,7 +32,7 @@ func checkContract(i int, c chan int, str []string, wg *sync.WaitGroup) {
 	code := str[2]
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
-	if err := exec.CommandContext(ctx, "python3", teether_path+"bin/gen_exploit.py", code, "0x1234", "0x1000", "+1000", teether_path+result_file_dir+fmt.Sprint(i)+".txt", str[0]).Run(); err != nil {
+	if err := exec.CommandContext(ctx, "python3", teether_path+"bin/gen_exploit.py", code, "0x1234", "0x1000", "+1000", teether_path+result_file_dir+fmt.Sprint(i)+".txt", str[0], str[1]).Run(); err != nil {
 		fmt.Println("timeout: " + fmt.Sprint(i) + err.Error())
 		<-c
 		return
